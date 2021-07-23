@@ -1,80 +1,120 @@
 import java.io.*;
 import java.net.Socket;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Client {
-
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        Scanner scanner= new Scanner(System.in);
         Socket socket =new Socket("127.0.0.1",8010);
-        System.out.println("client: Socket was created");
+        System.out.println("client: Created Socket");
 
-        ObjectOutputStream toServer=new ObjectOutputStream(socket.getOutputStream());
-        ObjectInputStream fromServer=new ObjectInputStream(socket.getInputStream());
+        InputStream inputStream = socket.getInputStream();
+        OutputStream outputStream = socket.getOutputStream();
+        ObjectOutputStream toServer=new ObjectOutputStream(outputStream);
+        ObjectInputStream fromServer=new ObjectInputStream(inputStream);
 
         // sending #1 matrix
-        int[][] matrix = {
-                {1,1,0,1,1},
-                {0,1,1,1,1},
-                {0,0,0,0,0},
-                {0,0,1,0,0}
+        final int[][] matrix = {
+                {200, 300, 100, 100},
+                {500, 500, 300, 100},
+                {200, 300, 100, 100}
+
+//1,0));
+// (1,2));
         };
-        /**
-         * TODO:
-         * make sure to get a matrix before getting reachables,neighbors commands
-         * prompt the user to enter one of the following commands: matrix,reachables,neighbors
-         * if token is not valid, prompt the user to enter a valid command
-         * if the user entered either reachables or neighbors command: get index according
-         * to the following pattern: (rowNumber,columnNumber).
-         * Hint: use split() method to split the input and create an Index object
-         * use  Integer.parseInt() to convert a string into an integer number
-         * validation of number (either floating point number or int is not mandatory)
-         *
-         * EXTRA:
-         * get input arrays from file  using FileInputStream
-         * https://docs.oracle.com/javase/7/docs/api/java/io/FileInputStream.html#:~:text=A%20FileInputStream%20obtains%20input%20bytes%20from%20a%20file%20in%20a%20file%20system.&text=FileInputStream%20is%20meant%20for%20reading,%2C%20FileDescriptor%20%2C%20FileOutputStream%20%2C%20Files.
-         */
+        PrintArr(matrix);
 
+        //task1(toServer,fromServer,matrix);
+        //task2(toServer,fromServer,matrix);
+       // task3(toServer,fromServer,matrix);
+        task4(toServer,fromServer,matrix);
 
-        /**
-         * Sets the matrix to the server
-         * */
-        toServer.writeObject("matrix");
+        CloseConnection(socket,toServer,fromServer);
+    }
+
+    private static void task3(ObjectOutputStream toServer, ObjectInputStream fromServer, int[][] matrix)throws IOException, ClassNotFoundException {
+        toServer.writeObject("3");
+        // client send matrix
         toServer.writeObject(matrix);
+        int result = (int)fromServer.readObject();
+        // display result
+        System.out.println("Number of submarines: " + result);
+        System.out.println("Client finished Task 3");
+    }
 
-        /**
-         * Task 1: find 2d array reachables groups sorted from biggest to smallest group
-         * */
 
+    public static void task1(ObjectOutputStream toServer,ObjectInputStream fromServer,int[][]matrix) throws IOException, ClassNotFoundException {
         toServer.writeObject("1");
+        // client send matrix
+        toServer.writeObject(matrix);
+        List result =
+                new LinkedList((List<Index>) fromServer.readObject());
+        // display result
+        System.out.println("The connected components of matrix is:");
+        PrintPaths(result);
         System.out.println("Client finished Task 1");
 
-       /**
-        * Task 2: find all shortest paths from source to destination
-        * Dijkstra
-        * */
+    }
+
+    public static void task2( ObjectOutputStream toServer,ObjectInputStream fromServer,int[][]matrix) throws IOException, ClassNotFoundException {
         toServer.writeObject("2");
-        Index sourceIndex = new Index(0,0);
-        System.out.println(sourceIndex);
-        Index destinationIndex = new Index(0,4);
-        toServer.writeObject(sourceIndex);
-        System.out.println("client source index" + sourceIndex);
-
-        toServer.writeObject(destinationIndex);
+        // client send matrix
+        toServer.writeObject(matrix);
+        // initialize source index
+        Index source = new Index(0,0);
+        // initialize target index
+        Index dest = new Index(3,3);
+        // client send source index
+        toServer.writeObject(source);
+        // client send target index
+        toServer.writeObject(dest);
+        // get shortest paths from server
+        List result =
+                new LinkedList((List<Index>) fromServer.readObject());
+        // display result
+        System.out.println("The Shortest Paths from " + source + " to " + dest + " is:");
+        PrintPaths(result);
         System.out.println("Client finished Task 2");
+    }
 
+    private static void task4(ObjectOutputStream toServer, ObjectInputStream fromServer, int[][] matrix) throws IOException, ClassNotFoundException {
+        toServer.writeObject("4");
+        toServer.writeObject(matrix);
+        toServer.writeObject(new Index(1,0));
+        toServer.writeObject(new Index(1,2));
+        int result = (int)fromServer.readObject();
+        // display result
+         System.out.println("The connected components of matrix is:");
+            System.out.println(result);
+           System.out.println("Client finished Task 3");
+    }
 
+    public static void PrintArr(int[][] arr)
+    {
+        for (int i = 0 ; i < arr.length ; i++)
+        {
+            for(int j = 0 ; j < arr[0].length;j++)
+            {
+                System.out.print("[ " + arr[i][j] + " ]");
+            }
+            System.out.println();
+        }
+    }
 
+    public static void PrintPaths(List paths)
+    {
+        for(var path : paths)
+        {
+            System.out.println(path);
+        }
+    }
+
+    public static void CloseConnection(Socket socket,ObjectOutputStream toServer,ObjectInputStream fromServer) throws IOException {
         toServer.writeObject("stop");
-
-
-        /**closing the streams because the system allocates memory for them
-        * */
         fromServer.close();
         toServer.close();
         socket.close();
-        System.out.println("Client: Closed operational socket");
-
     }
+
 }

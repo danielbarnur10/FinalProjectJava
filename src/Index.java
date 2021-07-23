@@ -1,13 +1,11 @@
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-
-public class Index implements Serializable ,Comparable<Index>{
-    int row, column;
-    int dist;
+public class Index implements Comparable<Index>, Serializable{
+    private int row;
+    private int column;
 
     public Index(final int row, final int column) {
         this.row=row;
@@ -29,13 +27,13 @@ public class Index implements Serializable ,Comparable<Index>{
     public void setColumn(int column) {
         this.column = column;
     }
-    //for task 2 daniel added this getters and setter of dist
-    public void setdist2source(int dist){
-        this.dist=dist;
+
+    public void setRowAndCol(int row,int col)
+    {
+        this.row = row;
+        this.column = col;
     }
-    public int getdist2source(){
-        return this.dist;
-    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -50,16 +48,6 @@ public class Index implements Serializable ,Comparable<Index>{
         return Objects.hash(row, column);
     }
 
-    public static void main(String[] args) {
-        List<Index> indexes = new ArrayList<>();
-        indexes.add(new Index(1,1));
-        indexes.add(new Index(2,2));
-        indexes.add(new Index(3,3));
-
-        System.out.println(indexes);
-
-    }
-
     @Override
     public String toString() {
         return "("+row +
@@ -69,10 +57,9 @@ public class Index implements Serializable ,Comparable<Index>{
 
     @Override
     public int compareTo(@NotNull Index o) {
-        return Integer.compare(this.row,o.row) == 0 ?
+        return this.row == o.row ?
                 Integer.compare(this.column,o.column) :
                 Integer.compare(this.row,o.row);
     }
 
-    private static final long serialVersionUID = 1L;
 }

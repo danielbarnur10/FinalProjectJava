@@ -22,39 +22,23 @@ While stack is not empty: // there are nodes to handle V
         if the current reachable node is not in finished set && working stack
         push to stack
  */
-    public Collection<T> traverse(Index dest,Traversable<T> partOfGraph){
+    public Collection<T> traverse(Traversable<T> partOfGraph){
         workingStack.push(partOfGraph.getOrigin());
-        boolean hello =false;
         while(!workingStack.isEmpty()){
             Node<T> poppedNode = workingStack.pop();
             finished.add(poppedNode);
-            Collection<Node<T>> reachableNodes = partOfGraph.getReachableNodes2(poppedNode);
+            Collection<Node<T>> reachableNodes = partOfGraph.getReachableNodes(poppedNode);
             for (Node<T> singleReachableNode: reachableNodes){
                 if (!finished.contains(singleReachableNode) &&
                         !workingStack.contains(singleReachableNode)){
-//                    we need to save the dist of each node from source
-//                    Index curr = new index();
-//                    curr.set
-//                singleReachableNode.getData()).setdist2source(previews +1);
-                   if(dest.equals(singleReachableNode.getData())){
-                        hello = true;}
-                   if(hello){
-                       HashSet<T> recursepaths = new HashSet<>();
-                       Matrix matrix = new Matrix
-                       recursepaths.add(traverse(dest, partOfGraph)
-                   }
                     workingStack.push(singleReachableNode);
                 }
             }
         }
-
         HashSet<T> blackList = new HashSet<>();
         for (Node<T> node: finished){
             blackList.add(node.getData());
         }
-        HashSet<HashSet<T>> allofthem = new HashSet<>();
-        allofthem.add(blackList);
-        allofthem.add()
         return blackList;
     }
    /*
