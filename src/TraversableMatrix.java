@@ -16,6 +16,11 @@ public class TraversableMatrix implements Traversable<Index> {
         this.matrix = matrix;
     }
 
+    public TraversableMatrix(TraversableMatrix matrix, Index startIndex) {
+        this.matrix = matrix.matrix;
+        this.startIndex = startIndex;
+    }
+
     public Matrix getMatrix() {
         return matrix;
     }
@@ -27,6 +32,8 @@ public class TraversableMatrix implements Traversable<Index> {
     public void setStartIndex(Index startIndex) {
         this.startIndex = startIndex;
     }
+
+
 
     @Override
     public Node<Index> getOrigin() throws NullPointerException{

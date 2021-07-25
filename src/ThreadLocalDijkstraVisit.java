@@ -52,8 +52,6 @@ public class ThreadLocalDijkstraVisit<T> {
                 }
             }
         }
-
-
         for (Node<T> node:
              minList) {
             if(node.getCost() == minimumCost.get()){

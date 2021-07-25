@@ -14,6 +14,7 @@ public class ThreadLocalDfsVisit<T> {
         return stackThreadLocal.get().pop();
     }
 
+
     public Set<T> traverse(Traversable<T> partOfGraph){
         threadLocalPush(partOfGraph.getOrigin());
         while(!stackThreadLocal.get().isEmpty()){
@@ -35,5 +36,7 @@ public class ThreadLocalDfsVisit<T> {
         this.stackThreadLocal.get().clear();
         return blackList;
     }
+
+
 
 }

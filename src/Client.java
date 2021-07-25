@@ -16,32 +16,32 @@ public class Client {
 
         // sending #1 matrix
         final int[][] matrix = {
-                {200, 300, 100, 100},
-                {500, 500, 300, 100},
-                {200, 300, 100, 100}
+                {1, 0, 1, 1},
+                {1, 0, 1, 1},
+                {1, 0, 0, 1}
 
-//1,0));
-// (1,2));
+            //1,0));
+            // (1,2));
         };
         PrintArr(matrix);
 
-        //task1(toServer,fromServer,matrix);
-        //task2(toServer,fromServer,matrix);
-       // task3(toServer,fromServer,matrix);
-        task4(toServer,fromServer,matrix);
+//        task1(toServer,fromServer,matrix);
+//        task2(toServer,fromServer,matrix);
+//        task3(toServer,fromServer,matrix);
+
+        final int[][] matrix2 = {
+                {100, 100, 100, 100},
+                {500, 300, 200, 100},
+                {100, 100, 100, 100}
+
+                //1,0));
+                // (1,2));
+        };
+        task4(toServer,fromServer,matrix2);
 
         CloseConnection(socket,toServer,fromServer);
     }
 
-    private static void task3(ObjectOutputStream toServer, ObjectInputStream fromServer, int[][] matrix)throws IOException, ClassNotFoundException {
-        toServer.writeObject("3");
-        // client send matrix
-        toServer.writeObject(matrix);
-        int result = (int)fromServer.readObject();
-        // display result
-        System.out.println("Number of submarines: " + result);
-        System.out.println("Client finished Task 3");
-    }
 
 
     public static void task1(ObjectOutputStream toServer,ObjectInputStream fromServer,int[][]matrix) throws IOException, ClassNotFoundException {
@@ -76,6 +76,16 @@ public class Client {
         System.out.println("The Shortest Paths from " + source + " to " + dest + " is:");
         PrintPaths(result);
         System.out.println("Client finished Task 2");
+    }
+
+    private static void task3(ObjectOutputStream toServer, ObjectInputStream fromServer, int[][] matrix)throws IOException, ClassNotFoundException {
+        toServer.writeObject("3");
+        // client send matrix
+        toServer.writeObject(matrix);
+        int result = (int)fromServer.readObject();
+        // display result
+        System.out.println("Number of submarines: " + result);
+        System.out.println("Client finished Task 3");
     }
 
     private static void task4(ObjectOutputStream toServer, ObjectInputStream fromServer, int[][] matrix) throws IOException, ClassNotFoundException {
