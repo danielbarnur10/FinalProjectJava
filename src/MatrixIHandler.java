@@ -247,17 +247,6 @@ public class MatrixIHandler implements IHandler {
     }
 
     /**
-     *
-     * @param traversableWeightedMatrix
-     * @param dest
-     * @return List
-     */
-    private List Lightest(TraversableWeightedMatrix traversableWeightedMatrix, Index dest) {
-        // Get shortest path
-        return dijkstraAlgo.traverse(new Node(dest), traversableWeightedMatrix);
-    }
-
-    /**
      * @param inputFromUser
      * @param outputToUser
      * Task 4 - Find Lightest paths
@@ -281,10 +270,8 @@ public class MatrixIHandler implements IHandler {
         // Initialize origin index
         traversableWeightedMatrix.setStartIndex(source);
 
-        List shortestPath = new ArrayList<>();
-        tasks.add(() -> {
-            shortestPath.add(Lightest(traversableWeightedMatrix,dest));
-        return null;});
+        List shortestPath =   dijkstraAlgo.traverse(traversableWeightedMatrix,new Node(dest));
+
 
         System.out.println(shortestPath);
         // Sending the result to the client
