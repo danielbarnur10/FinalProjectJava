@@ -20,6 +20,12 @@ public class ThreadLocalDijkstraVisit<T> {
         return priorityQueueThreadLocal.get().peek();
     }
 
+    /**
+     *
+     * @param dest
+     * @param partOfGraph
+     * @return List
+     */
     public List traverse(Node<T>dest,Traversable<T> partOfGraph){
 
         LinkedList<LinkedList<Node<T>>> allPath = new LinkedList<>();
@@ -44,9 +50,7 @@ public class ThreadLocalDijkstraVisit<T> {
                         {
                             minList.add(poppedNode);
                             minimumCost.set(poppedNode.getCost());
-
                         }
-
                     }
                     AddPriorityQueue(singleReachableNode);
                 }
@@ -63,6 +67,13 @@ public class ThreadLocalDijkstraVisit<T> {
         result.addAll(allPath);
         return result;
     }
+
+    /**
+     *
+     * @param node
+     * @param dest
+     * @return
+     */
     private LinkedList<T> getPath(Node<T> node,Node<T> dest)
     {
         LinkedList<T> path = new LinkedList<>();
@@ -77,6 +88,10 @@ public class ThreadLocalDijkstraVisit<T> {
         return path;
     }
 
+    /**
+     *
+     * @param node
+     */
     private void printPath(Node<T> node)
     {
         Node<T>next = node.getParent();

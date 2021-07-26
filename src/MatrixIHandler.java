@@ -85,7 +85,7 @@ public class MatrixIHandler implements IHandler {
     private void task1(ObjectInputStream inputFromUser, ObjectOutputStream outputToUser) throws IOException, ClassNotFoundException {
         List<Callable<Void>> tasks = new ArrayList<>();
         ExecutorService threadPool = Executors.newFixedThreadPool(10);
-        AtomicInteger count = new AtomicInteger();
+//        AtomicInteger count = new AtomicInteger();
         // Get a matrix from client
         Matrix matrix = new Matrix((int[][]) inputFromUser.readObject());
         traversableMatrix = new TraversableMatrix(matrix);
@@ -247,11 +247,25 @@ public class MatrixIHandler implements IHandler {
     }
 
     /**
+     *
+     * @param traversableWeightedMatrix
+     * @param dest
+     * @return List
+     */
+    private List Lightest(TraversableWeightedMatrix traversableWeightedMatrix, Index dest) {
+        // Get shortest path
+        return dijkstraAlgo.traverse(new Node(dest), traversableWeightedMatrix);
+    }
+
+    /**
      * @param inputFromUser
      * @param outputToUser
      * Task 4 - Find Lightest paths
      * */
     private void task4(ObjectInputStream inputFromUser, ObjectOutputStream outputToUser) throws IOException, ClassNotFoundException {
+        List<Callable<Void>> tasks = new ArrayList<>();
+        ExecutorService threadPool = Executors.newFixedThreadPool(10);
+
         // Get matrix
         Matrix matrix = new Matrix((int[][]) inputFromUser.readObject());
 
@@ -267,8 +281,10 @@ public class MatrixIHandler implements IHandler {
         // Initialize origin index
         traversableWeightedMatrix.setStartIndex(source);
 
-        // Get shortest path
-        List shortestPath = (List) dijkstraAlgo.traverse(new Node(dest), traversableWeightedMatrix);
+        List shortestPath = new ArrayList<>();
+        tasks.add(() -> {
+            shortestPath.add(Lightest(traversableWeightedMatrix,dest));
+        return null;});
 
         System.out.println(shortestPath);
         // Sending the result to the client

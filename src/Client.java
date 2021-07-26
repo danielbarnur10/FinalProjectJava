@@ -26,18 +26,18 @@ public class Client {
                 {100, 100, 100, 100}
 
         };
-        System.out.println("Binary matrix:");
-        PrintArr(matrix);
-
-
-        task1(toServer,fromServer,matrix);
-        System.out.println("###################################");
-
-        task2(toServer,fromServer,matrix);
-        System.out.println("###################################");
-
-        task3(toServer,fromServer,matrix);
-        System.out.println("###################################");
+//        System.out.println("Binary matrix:");
+//        PrintArr(matrix);
+//
+//
+//        task1(toServer,fromServer,matrix);
+//        System.out.println("###################################");
+//
+//        task2(toServer,fromServer,matrix);
+//        System.out.println("###################################");
+//
+//        task3(toServer,fromServer,matrix);
+//        System.out.println("###################################");
 
         System.out.println("Positive Weighted matrix:");
         PrintArr(matrix2);
@@ -101,9 +101,9 @@ public class Client {
         toServer.writeObject(new Index(1,2));
         List result = (List)fromServer.readObject();
         // display result
-         System.out.println("The connected components of matrix is:");
+         System.out.println("The Lightest paths are:");
             System.out.println(result);
-           System.out.println("Client finished Task 3");
+           System.out.println("Client finished Task 4");
     }
 
     public static void PrintArr(int[][] arr)
