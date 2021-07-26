@@ -1,8 +1,6 @@
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class Client {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
@@ -20,24 +18,32 @@ public class Client {
                 {1, 0, 1, 1},
                 {1, 0, 0, 1}
 
-            //1,0));
-            // (1,2));
         };
-        PrintArr(matrix);
-
-//        task1(toServer,fromServer,matrix);
-//        task2(toServer,fromServer,matrix);
-//        task3(toServer,fromServer,matrix);
 
         final int[][] matrix2 = {
                 {100, 100, 100, 100},
                 {500, 300, 200, 100},
                 {100, 100, 100, 100}
 
-                //1,0));
-                // (1,2));
         };
+        System.out.println("Binary matrix:");
+        PrintArr(matrix);
+
+
+        task1(toServer,fromServer,matrix);
+        System.out.println("###################################");
+
+        task2(toServer,fromServer,matrix);
+        System.out.println("###################################");
+
+        task3(toServer,fromServer,matrix);
+        System.out.println("###################################");
+
+        System.out.println("Positive Weighted matrix:");
+        PrintArr(matrix2);
         task4(toServer,fromServer,matrix2);
+        System.out.println("###################################");
+
 
         CloseConnection(socket,toServer,fromServer);
     }
@@ -93,7 +99,7 @@ public class Client {
         toServer.writeObject(matrix);
         toServer.writeObject(new Index(1,0));
         toServer.writeObject(new Index(1,2));
-        int result = (int)fromServer.readObject();
+        List result = (List)fromServer.readObject();
         // display result
          System.out.println("The connected components of matrix is:");
             System.out.println(result);

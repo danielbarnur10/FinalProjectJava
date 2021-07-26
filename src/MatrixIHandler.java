@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class MatrixIHandler implements IHandler {
-    // Atomic integer containing the next thread ID to be assigned
     private boolean doWork = true;
     private final ThreadLocalDfsVisit<Index> dfsAlgo;
 
@@ -24,6 +23,14 @@ public class MatrixIHandler implements IHandler {
         dijkstraAlgo = new ThreadLocalDijkstraVisit<>();
     }
 
+    /**
+     *
+     * @param inputFromUser
+     * @param inputToUser
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * Handles requests from Server
+     */
     @Override
     public void handle(InputStream inputFromUser, OutputStream inputToUser) throws IOException, ClassNotFoundException {
         ObjectInputStream objectInputStream = new ObjectInputStream(inputFromUser);
@@ -43,9 +50,8 @@ public class MatrixIHandler implements IHandler {
                     task3(objectInputStream, objectOutputStream);
                     break;
                 }
-                case "4": {
-                    task4(objectInputStream, objectOutputStream);
-                    break;
+                case "4":{
+                    task4(objectInputStream,objectOutputStream);
                 }
                 case "stop": {
                     doWork = false;
@@ -58,14 +64,24 @@ public class MatrixIHandler implements IHandler {
 
     }
 
-    private void dfsAlgoCPU(TraversableMatrix matrix, HashSet<HashSet<Index>> setOfComponents) {
+    /**
+     *
+     * @param matrix
+     * @param setOfComponents
+     * Related function to Task 1.
+     */
+    private void DFSCallable(TraversableMatrix matrix, Set<HashSet<Index>> setOfComponents) {
         // CPU consuming logic here.
         // e.g. check if set of vertices is a submarine (3), or collect all vertices in a connected component (1)
         System.out.println("Running Thread: " + Thread.currentThread().getName());
         setOfComponents.add((HashSet<Index>) dfsAlgo.traverse(traversableMatrix));
 
     }
-
+    /**
+     * @param inputFromUser
+     * @param outputToUser
+     * Find all connected components with the 1's
+     * */
     private void task1(ObjectInputStream inputFromUser, ObjectOutputStream outputToUser) throws IOException, ClassNotFoundException {
         List<Callable<Void>> tasks = new ArrayList<>();
         ExecutorService threadPool = Executors.newFixedThreadPool(10);
@@ -83,9 +99,9 @@ public class MatrixIHandler implements IHandler {
                 index.setRowAndCol(i, j);
                 if (matrix.getValue(index) == 1) {
                     traversableMatrix.setStartIndex(new Index(i, j));
-                    //Callable function dfsAlgoCPU(TraversableMatrix matrix)
+                    //Callable function DFSCallableDFSCallable(TraversableMatrix matrix,setOfcomponents)
                     tasks.add(() -> {
-                        dfsAlgoCPU(traversableMatrix, setOfComponents);
+                        DFSCallable(traversableMatrix, setOfComponents);
                         return null;
                     });
                 }
@@ -104,31 +120,45 @@ public class MatrixIHandler implements IHandler {
         setOfComponents.stream().sorted(lengthComparator).forEach((i) -> componentResult.add(i));
         outputToUser.writeObject(componentResult);
     }
-
+    /**
+     * @param inputFromUser
+     * @param outputToUser
+     * Find shortest paths from source index to destination index
+     * */
     private void task2(ObjectInputStream inputFromUser, ObjectOutputStream outputToUser) throws IOException, ClassNotFoundException {
-        // Get matrix
+        // Receive matrix from Server
         Matrix matrix = new Matrix((int[][]) inputFromUser.readObject());
 
-        // Get source
+        // Receive source from Server
         Index source = (Index) inputFromUser.readObject();
 
-        // Get target
+        // Receive target from Server
         Index dest = (Index) inputFromUser.readObject();
 
-        // Get traversable
+        // Create TraversableMatrix Object
         traversableMatrix = new TraversableMatrix(matrix);
 
         // Initialize origin index
         traversableMatrix.setStartIndex(source);
 
-        // Get shortest path
+        // Receive shortest path from BFSAlgo class traverse
         List shortestPath = (List) bfsAlgo.traverse(new Node(dest), traversableMatrix);
 
-        // Sending the result to the client
-        outputToUser.writeObject(shortestPath);
-
+        // Sending back the result to the Client
+        if(shortestPath.size()==0) {
+            shortestPath.add("#Shortest Path doesn't exist! Note: choose different indices#");
+        }
+            outputToUser.writeObject(shortestPath);
     }
 
+    /**
+     *
+     * @param traversableMatrix
+     * @param index
+     * @return Set<Index>
+     * @return  null
+     * Submarine Game, Related to Task 3.
+     */
     private Set<Index> isSubmarine(TraversableMatrix traversableMatrix, Index index) {
         // CPU consuming logic here.
         // e.g. check if set of vertices is a submarine (3), or collect all vertices in a connected component (1)
@@ -136,7 +166,7 @@ public class MatrixIHandler implements IHandler {
         traversableMatrix = new TraversableMatrix(traversableMatrix,index);
         Set<Index> set = (HashSet<Index>) dfsAlgo.traverse(traversableMatrix);
         Index Max = traversableMatrix.startIndex, Min = traversableMatrix.startIndex;
-        //Finding max and min indecies (start and end indecies) comparing indecies
+        //Finding max and min indices (start and end indices) comparing indices
 
         for (Index element :
                 set) {
@@ -160,7 +190,11 @@ public class MatrixIHandler implements IHandler {
 
         }
     }
-
+    /**
+     * @param inputFromUser
+     * @param outputToUser
+     * Task 3 - Submarine Game
+     * */
     private void task3(ObjectInputStream inputFromUser, ObjectOutputStream outputToUser) throws IOException, ClassNotFoundException {
         ExecutorService threadPool = Executors.newFixedThreadPool(10);
         List<Callable<Void>> tasks = new ArrayList<>();
@@ -194,35 +228,6 @@ public class MatrixIHandler implements IHandler {
                         return null; // This is a must, cause we are Callable<Void> and not Runnable.
                     });
 
-               /*     traversableMatrix.setStartIndex(index);
-                    HashSet<Index> set = (HashSet<Index>) dfsAlgo.traverse(traversableMatrix);
-
-                    Index Max = traversableMatrix.startIndex, Min = traversableMatrix.startIndex;
-                    //Finding max and min indecies (start and end indecies) comparing indecies
-
-                    for (Index element :
-                            set) {
-                        dfsAlgo.count.set(dfsAlgo.count.get());
-                        if (element.compareTo(Max) == 1) {
-                            Max = element;
-                        }
-                        if (element.compareTo(Min) <= 0) {
-                            Min = element;
-                        }
-                    }
-                    int maxR = Max.getRow() + 1, maxC = Max.getColumn() + 1;
-                    int minR = Min.getRow(), minC = Min.getColumn();
-                    //Calculating the Area of the ones (1)s,
-                    //if the Area is equal to amount of count2 we return true (isSubmarine)
-                    if (((maxR - minR) * (maxC - minC)) == dfsAlgo.count.get()) {
-                        System.out.println("Found a Submarine");
-                    }
-                    else{
-                        System.out.println("nothing");
-                    }
-                }
-            }
-       */
                 }
             }
         }
@@ -236,13 +241,16 @@ public class MatrixIHandler implements IHandler {
             e.printStackTrace();
         }
 
-//        System.out.printf("Detected %d nine tailed images out of %d%n", count, images.size());
-
         System.out.println(setOfComponents.size());
         System.out.println(setOfComponents);
         outputToUser.writeObject(setOfComponents.size());
     }
 
+    /**
+     * @param inputFromUser
+     * @param outputToUser
+     * Task 4 - Find Lightest paths
+     * */
     private void task4(ObjectInputStream inputFromUser, ObjectOutputStream outputToUser) throws IOException, ClassNotFoundException {
         // Get matrix
         Matrix matrix = new Matrix((int[][]) inputFromUser.readObject());
@@ -263,7 +271,7 @@ public class MatrixIHandler implements IHandler {
         List shortestPath = (List) dijkstraAlgo.traverse(new Node(dest), traversableWeightedMatrix);
 
         System.out.println(shortestPath);
-//        // Sending the result to the client
-//        outputToUser.writeObject(shortestPath);
+        // Sending the result to the client
+        outputToUser.writeObject(shortestPath);
     }
 }
