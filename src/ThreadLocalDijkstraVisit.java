@@ -2,7 +2,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ThreadLocalDijkstraVisit<T> {
@@ -13,7 +13,7 @@ public class ThreadLocalDijkstraVisit<T> {
     protected ThreadLocal<Integer> minimumCost =
             ThreadLocal.withInitial(()->Integer.MAX_VALUE);
     protected ThreadLocal<Set<Node<T>>> minList = ThreadLocal.withInitial(()->new HashSet<>());
-    protected AtomicInteger atomicInteger = new AtomicInteger(1);
+    protected AtomicBoolean atomicBoolean = new AtomicBoolean(true);
 
     protected void AddPriorityQueue(Node<T> node){
         priorityQueueThreadLocal.get().add(node);
@@ -30,31 +30,17 @@ public class ThreadLocalDijkstraVisit<T> {
 
 
 
-    private void Lightest(Traversable<T> partOfGraph,Node<T> poppedNode,Node<T> dest) {
+    private  Collection<Node<T>> Lightest(Traversable<T> partOfGraph,Node<T> poppedNode,Node<T> dest) {
         System.out.println("@@@@@@@@@@@@@@@@@@@@@@@");
-        Collection<Node<T>> reachableNodes = partOfGraph.getReachableNodes(poppedNode);
-        for(Node<T> singleReachableNode : reachableNodes)
-        {
-            if(!finishedThreadLocal.get().contains(singleReachableNode))
-            {
-                if(dest.getData().equals(singleReachableNode.getData()))
-                {
-                    if(poppedNode.getCost() <= minimumCost.get() )
-                    {
-                        AddMinSet(poppedNode);
-                        minimumCost.set(poppedNode.getCost());
-                    }
-                }
-                AddPriorityQueue(singleReachableNode);
-            }
-        }
+        return partOfGraph.getReachableNodes(poppedNode);
+
     }
-    /**
-     *
-     * @param dest
-     * @param partOfGraph
-     * @return List
-     */
+        /**
+         *
+         * @param dest
+         * @param partOfGraph
+         * @return List
+         */
     public List traverse(Traversable<T> partOfGraph,Node<T>dest){
         List<Callable<Void>> tasks = new ArrayList<>();
         ExecutorService threadPool = Executors.newFixedThreadPool(10);
@@ -70,18 +56,41 @@ public class ThreadLocalDijkstraVisit<T> {
         {
 
             tasks.add(()->{
+                System.out.println("%%%%23%%%%%%%%%%%");
 
-                if(atomicInteger.equals(1))
-                locker.lock();
-                atomicInteger.set(0);
-                System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-                Node<T> poppedNode = PopPriorityQueue();
-                priorityQueueThreadLocal.get().poll();
-                AddFinishedSet(poppedNode);
-                Lightest(partOfGraph,poppedNode,dest);
-                atomicInteger.set(1);
-                locker.unlock();
-            return null;});
+                if(atomicBoolean.get()) {
+                   try {
+                       locker.lock();
+                       atomicBoolean.set(false);
+                       System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+                       Node<T> poppedNode = PopPriorityQueue();
+                       priorityQueueThreadLocal.get().poll();
+                       AddFinishedSet(poppedNode);
+                       Collection<Node<T>> reachableNodes = Lightest(partOfGraph, poppedNode, dest);
+                       for (Node<T> singleReachableNode : reachableNodes) {
+                           threadPool.submit(new Runnable() {
+                               @Override
+                               public void run() {
+
+                                   if (!finishedThreadLocal.get().contains(singleReachableNode)) {
+                                       if (dest.getData().equals(singleReachableNode.getData())) {
+                                           if (poppedNode.getCost() <= minimumCost.get()) {
+                                               AddMinSet(poppedNode);
+                                               minimumCost.set(poppedNode.getCost());
+                                           }
+                                       }
+                                       AddPriorityQueue(singleReachableNode);
+                                   }
+                               }
+
+                           });
+                       }
+                   }finally{ locker.unlock();
+                    atomicBoolean.set(true);
+                   }
+                }
+
+                return null;});
 
         }
         try {
