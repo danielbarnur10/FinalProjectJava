@@ -38,7 +38,7 @@ public class SingleToMultiThreadedLogic {
 
         // Prepare callables that we will invoke using the thread pool.
         // The thread pool will take care of separating the tasks among its threads
-        // Here our logic returns a boolean, hence Callable<Boolean>. Ex1 returns Set<Index> or Set<Node>
+        // Here our logic returns a boolean, hence Callable<Boolean>. Ex1 returns Set<matrix.Index> or Set<matrix.Node>
         List<Callable<Boolean>> tasks = new ArrayList<>();
 
         // Your data, e.g. list of sets (list of connected component from Ex1, or list of all vertices (all indices with value=1)

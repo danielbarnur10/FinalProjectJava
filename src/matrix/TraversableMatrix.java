@@ -1,7 +1,8 @@
+package matrix;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * This class implements adapter/wrapper/decorator design pattern
@@ -52,6 +53,12 @@ public class TraversableMatrix implements Traversable<Index> {
             }
         }
         return reachableIndex;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <R> R getValue(Node<Index> someNode) {
+        return (R)Integer.valueOf(matrix.getValue(someNode.getData()));
     }
 
     @Override

@@ -1,3 +1,7 @@
+package server;
+
+import algorithms.MatrixIHandler;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -32,7 +36,7 @@ public class TcpServer {
     operations
     There are 2 kinds of sockets:
     1. Server Socket - listen and accept incoming connection
-    2. Operational Socket (known as a Client Socket) - read from/write to a data stream
+    2. Operational Socket (known as a Client.Client Socket) - read from/write to a data stream
 
     Each socket is associated with a transport protocol (TCP/UDP) and local information (ip and port).
     Port is used to distinguish between different types of data transmitted over the same data-line

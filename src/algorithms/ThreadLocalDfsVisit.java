@@ -1,3 +1,8 @@
+package algorithms;
+
+import matrix.Node;
+import matrix.Traversable;
+
 import java.util.*;
 
 public class ThreadLocalDfsVisit<T> {

@@ -1,3 +1,7 @@
+package client;
+
+import matrix.Index;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
@@ -14,9 +18,10 @@ public class Client {
 
         // sending #1 matrix
         final int[][] matrix = {
-                {1, 0, 1, 1},
-                {1, 0, 1, 1},
-                {1, 0, 0, 1}
+                {1, 1, 1, 1},
+                {1, 0, 1, 0},
+                {1, 1, 1, 1},
+                {1, 0, 1, 1}
 
         };
 
@@ -26,18 +31,17 @@ public class Client {
                 {100, 100, 100, 100}
 
         };
-//        System.out.println("Binary matrix:");
-//        PrintArr(matrix);
-//
-//
-//        task1(toServer,fromServer,matrix);
-//        System.out.println("###################################");
-//
-//        task2(toServer,fromServer,matrix);
-//        System.out.println("###################################");
-//
-//        task3(toServer,fromServer,matrix);
-//        System.out.println("###################################");
+        System.out.println("Binary matrix:");
+        PrintArr(matrix);
+
+        task1(toServer,fromServer,matrix);
+        System.out.println("###################################");
+
+        task2(toServer,fromServer,matrix);
+        System.out.println("###################################");
+
+        task3(toServer,fromServer,matrix);
+        System.out.println("###################################");
 
         System.out.println("Positive Weighted matrix:");
         PrintArr(matrix2);
@@ -49,7 +53,7 @@ public class Client {
     }
 
 
-
+    @SuppressWarnings("unchecked")
     public static void task1(ObjectOutputStream toServer,ObjectInputStream fromServer,int[][]matrix) throws IOException, ClassNotFoundException {
         toServer.writeObject("1");
         // client send matrix
@@ -59,10 +63,10 @@ public class Client {
         // display result
         System.out.println("The connected components of matrix is:");
         PrintPaths(result);
-        System.out.println("Client finished Task 1");
+        System.out.println("Client.Client finished Task 1");
 
     }
-
+    @SuppressWarnings("unchecked")
     public static void task2( ObjectOutputStream toServer,ObjectInputStream fromServer,int[][]matrix) throws IOException, ClassNotFoundException {
         toServer.writeObject("2");
         // client send matrix
@@ -81,7 +85,7 @@ public class Client {
         // display result
         System.out.println("The Shortest Paths from " + source + " to " + dest + " is:");
         PrintPaths(result);
-        System.out.println("Client finished Task 2");
+        System.out.println("Client.Client finished Task 2");
     }
 
     private static void task3(ObjectOutputStream toServer, ObjectInputStream fromServer, int[][] matrix)throws IOException, ClassNotFoundException {
@@ -91,19 +95,20 @@ public class Client {
         int result = (int)fromServer.readObject();
         // display result
         System.out.println("Number of submarines: " + result);
-        System.out.println("Client finished Task 3");
+        System.out.println("Client.Client finished Task 3");
     }
 
+    @SuppressWarnings("unchecked")
     private static void task4(ObjectOutputStream toServer, ObjectInputStream fromServer, int[][] matrix) throws IOException, ClassNotFoundException {
         toServer.writeObject("4");
         toServer.writeObject(matrix);
         toServer.writeObject(new Index(1,0));
         toServer.writeObject(new Index(1,2));
-        List result = (List)fromServer.readObject();
+        Collection<List<Index>> result = (Collection<List<Index>>) fromServer.readObject();
         // display result
          System.out.println("The Lightest paths are:");
             System.out.println(result);
-           System.out.println("Client finished Task 4");
+           System.out.println("Client.Client finished Task 4");
     }
 
     public static void PrintArr(int[][] arr)
