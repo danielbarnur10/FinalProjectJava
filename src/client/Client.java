@@ -43,7 +43,7 @@ public class Client {
         System.out.println("###################################");
 
         task2(toServer,fromServer);
-        System.out.println("###################################");
+       System.out.println("###################################");
 
         task3(toServer,fromServer);
         System.out.println("###################################");
@@ -61,7 +61,7 @@ public class Client {
     public static void task1(ObjectOutputStream toServer,ObjectInputStream fromServer) throws IOException, ClassNotFoundException {
         toServer.writeObject("1");
         // client send matrix
-        List result =
+        List<Set<Index>> result =
                 new LinkedList((List<Index>) fromServer.readObject());
         // display result
         System.out.println("The connected components of matrix is:");

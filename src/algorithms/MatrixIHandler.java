@@ -1,23 +1,18 @@
 package algorithms;
 
 import matrix.*;
-import server.IHandler;
-
+import server.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class MatrixIHandler implements IHandler {
     private boolean doWork = true;
     private final Index index = new Index(0, 0);
-    private TraversableWeightedMatrix traversableWeightedMatrix;
     private Matrix matrix;
     private Matrix weightedMatrix;
-    private List task1;
+    private List<Set<Index>> task1;
 
 
     /**
@@ -51,7 +46,7 @@ public class MatrixIHandler implements IHandler {
                 }
 
                 case "1": {
-                    List result = task1(matrix);
+                    List<Set<Index>> result = task1(matrix);
                     objectOutputStream.writeObject(result);
                     break;
                 }
@@ -95,40 +90,40 @@ public class MatrixIHandler implements IHandler {
 
     /**
      *
-     * @param traversableMatrix
+     * @param traversableMatrix created at task 1
      * @param setOfComponents
      * Related function to Task 1.
      */
-    private void DFSCallable(TraversableMatrix traversableMatrix, Set<HashSet<Index>> setOfComponents) {
+    private void DFSCallable(TraversableMatrix traversableMatrix, Set<Set<Index>> setOfComponents) {
         // CPU consuming logic here.
         // e.g. check if set of vertices is a submarine (3), or collect all vertices in a connected component (1)
         System.out.println("Running Thread: " + Thread.currentThread().getName());
-        setOfComponents.add((HashSet<Index>) new ThreadLocalDfsVisit<Index>().traverse(traversableMatrix));
+        setOfComponents.add(new ThreadLocalDfsVisit<Index>().traverse(traversableMatrix));
 
     }
 
     /**
      *
-     * @param matrix
+     * @param matrix from client
      * @return List of connected component.
      *  SCC- strongly connected components
      */
-    private List task1(Matrix matrix)  {
+    private List<Set<Index>> task1(Matrix matrix)  {
         List<Callable<Void>> tasks = new ArrayList<>();
-        ExecutorService threadPool = Executors.newFixedThreadPool(10);
-//        AtomicInteger count = new AtomicInteger();
+//       ExecutorService threadPool = Executors.newFixedThreadPool(10);
+        HandlingThread.getHandlingThreadInstance();
         // Get a matrix from client
         int row = matrix.getRowSize();
         int col = matrix.getColumnSize();
 
-        HashSet<HashSet<Index>> setOfComponents = new HashSet<>();
+        Set<Set<Index>> setOfComponents = new HashSet<>();
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
                 index.setRowAndCol(i, j);
                 if (matrix.getValue(index) == 1) {
                     TraversableMatrix traversableMatrix = new TraversableMatrix(matrix);
                     traversableMatrix.setStartIndex(new Index(i, j));
-                    //Callable function DFSCallableDFSCallable(matrix.TraversableMatrix matrix,setOfcomponents)
+                    //Callable function DFSCallableDFSCallable(matrix.TraversableMatrix matrix,setComponents)
                     tasks.add(() -> {
                         DFSCallable(traversableMatrix, setOfComponents);
                         return null;
@@ -138,24 +133,22 @@ public class MatrixIHandler implements IHandler {
         }
         try {
             // Now invoke all of the tasks
-            threadPool.invokeAll(tasks);
+            HandlingThread.getHandlingThreadInstance().InvokeAll(tasks);
         } catch (InterruptedException e) {
             // Handle the exception here..
             e.printStackTrace();
         }
-        threadPool.shutdown();
-        List componentResult = new LinkedList();
-        Comparator<HashSet<Index>> lengthComparator = (component1, component2) -> Integer.compare(component1.size(), component2.size());
-        setOfComponents.stream().sorted(lengthComparator).forEach((i) -> componentResult.add(i));
+        List<Set<Index>> componentResult = new LinkedList<>();
+        setOfComponents.stream().sorted(Comparator.comparingInt(Set::size)).forEach(componentResult::add);
         task1 = componentResult;
         return componentResult;
     }
 
     /**
      *
-     * @param matrix
-     * @param source
-     * @param dest
+     * @param matrix from client
+     * @param source from client source index
+     * @param dest from client destination index
      * @return Collection<Index>
      * Lightest paths from source to destination
 
@@ -169,15 +162,14 @@ public class MatrixIHandler implements IHandler {
         traversableMatrix.setStartIndex(source);
 
         // Receive shortest path from BFSAlgo class traverse
-        Collection<Index> shortestPath = new BFSvisit<Index>().traverse(new Node<>(dest), traversableMatrix);
 
-        return shortestPath;
+        return new BFSvisit<Index>().traverse(new Node<>(dest), traversableMatrix);
     }
 
     /**
      *
-     * @param traversableMatrix
-     * @param index
+     * @param traversableMatrix from Task 3 the for traverse
+     * @param index the index start
      * @return Set<matrix.Index>
      * Submarine Game, Related to Task 3.
      */
@@ -196,7 +188,7 @@ public class MatrixIHandler implements IHandler {
 
         for (Index element :
                 set) {
-            if (element.compareTo(Max) == 1) {
+            if (element.compareTo(Max) > 0) {
                 Max = element;
 
             }
@@ -219,20 +211,20 @@ public class MatrixIHandler implements IHandler {
 
     /**
      *
-     * @param matrix
+     * @param matrix from client
      * @return int
      * Submarine Game, return number of submarines
      */
     private int task3(Matrix matrix)  {
 
-        ExecutorService threadPool = Executors.newFixedThreadPool(10);
+//        ExecutorService threadPool = Executors.newFixedThreadPool(10);
         List<Callable<Void>> tasks = new ArrayList<>();
         AtomicInteger counter = new AtomicInteger(0);
 
-        List<HashSet<Index>> connectedComponent = task1;
+        List<Set<Index>> connectedComponent = task1;
         final TraversableMatrix traversableMatrix = new TraversableMatrix(matrix);
 
-        for(HashSet<Index> component : connectedComponent)
+        for(Set<Index> component : connectedComponent)
         {
             Index index = (Index) component.toArray()[0];
             tasks.add(() -> {
@@ -249,34 +241,31 @@ public class MatrixIHandler implements IHandler {
             // Now invoke all of the tasks
             // Note that there is no result from callable, we use Callable<Void>, so we do not need
             // to iterate over the futures. invokeAll already waits for all tasks to complete.
-            threadPool.invokeAll(tasks);
+            HandlingThread.getHandlingThreadInstance().InvokeAll(tasks);
         } catch (InterruptedException e) {
             // Handle the exception here.. Somehow...
             e.printStackTrace();
         }
-        threadPool.shutdown();
 
         return counter.get();
     }
 
     /**
      *
-     * @param matrix
-     * @param source
-     * @param dest
-     * @return
+     * @param matrix from client weighted matrix
+     * @param source start
+     * @param dest end
+     * @return Collection<List<Index>>
      */
     private Collection<List<Index>> task4(Matrix matrix,Index source,Index dest) {
 
         // Get traversable
-        traversableWeightedMatrix = new TraversableWeightedMatrix(matrix);
+        TraversableWeightedMatrix traversableWeightedMatrix = new TraversableWeightedMatrix(matrix);
 
         // Initialize origin index
         traversableWeightedMatrix.setStartIndex(source);
 
-        Collection<List<Index>> LightestPaths = new ThreadLocalDijkstraVisit<Index>().traverse(traversableWeightedMatrix, new Node<>(dest));
-
-        return LightestPaths;
+        return new ThreadLocalDijkstraVisit<Index>().traverse(traversableWeightedMatrix, new Node<>(dest));
 
     }
 }

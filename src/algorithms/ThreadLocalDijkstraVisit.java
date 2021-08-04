@@ -2,7 +2,7 @@ package algorithms;
 
 import matrix.Node;
 import matrix.Traversable;
-
+import server.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -49,7 +49,7 @@ public class ThreadLocalDijkstraVisit<T> {
         graph.getOrigin().setCost(0);//setting distance source
 
         // Now submit the first visit task, which will submit its sub-tasks, based
-        threadPool.submit(new NodeVisitTask(threadPool, graph, graph.getOrigin(), dest));
+        HandlingThread.getHandlingThreadInstance().Submit(new NodeVisitTask( graph, graph.getOrigin(), dest));
 
         try {
             while (tasksCounter.get() > 0) {
@@ -102,13 +102,12 @@ public class ThreadLocalDijkstraVisit<T> {
         /**
          * The thread pool which is used to invoke us. (NodeVisitTask)
          */
-        private final ExecutorService threadPool;
 
-        public NodeVisitTask(ExecutorService threadPool, Traversable<T> graph, Node<T> node, Node<T> dest) {
+
+        public NodeVisitTask( Traversable<T> graph, Node<T> node, Node<T> dest) {
             this.graph = graph;
             this.node = node;
             this.dest = dest;
-            this.threadPool = threadPool;
             tasksCounter.incrementAndGet();
         }
 
@@ -138,7 +137,7 @@ public class ThreadLocalDijkstraVisit<T> {
                         }
                     } else {
                         // Parallel
-                        threadPool.submit(new NodeVisitTask(threadPool, graph, neighbor, dest));
+                        HandlingThread.getHandlingThreadInstance().Submit((new NodeVisitTask(graph, neighbor, dest)));
                     }
                 }
             }

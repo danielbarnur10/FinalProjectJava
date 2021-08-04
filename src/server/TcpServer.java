@@ -135,7 +135,10 @@ public class TcpServer {
         public void stop(){
             if(!stopServer)
                 stopServer = true;
-            if(threadPool!=null) threadPool.shutdown();
+            if(threadPool!=null){
+                threadPool.shutdown();
+                HandlingThread.getHandlingThreadInstance().Shutdown();
+            }
         }
 
         public void jvmInfo(){
