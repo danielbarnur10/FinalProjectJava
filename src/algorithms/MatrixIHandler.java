@@ -17,6 +17,7 @@ public class MatrixIHandler implements IHandler {
     private TraversableWeightedMatrix traversableWeightedMatrix;
     private Matrix matrix;
     private Matrix weightedMatrix;
+    private List task1;
 
 
     /**
@@ -110,6 +111,7 @@ public class MatrixIHandler implements IHandler {
      *
      * @param matrix
      * @return List of connected component.
+     *  SCC- strongly connected components
      */
     private List task1(Matrix matrix)  {
         List<Callable<Void>> tasks = new ArrayList<>();
@@ -145,6 +147,7 @@ public class MatrixIHandler implements IHandler {
         List componentResult = new LinkedList();
         Comparator<HashSet<Index>> lengthComparator = (component1, component2) -> Integer.compare(component1.size(), component2.size());
         setOfComponents.stream().sorted(lengthComparator).forEach((i) -> componentResult.add(i));
+        task1 = componentResult;
         return componentResult;
     }
 
@@ -153,7 +156,8 @@ public class MatrixIHandler implements IHandler {
      * @param matrix
      * @param source
      * @param dest
-     * @return
+     * @return Collection<Index>
+     * Lightest paths from source to destination
 
      */
     private Collection<Index> task2(Matrix matrix,Index source, Index dest) {
@@ -216,16 +220,16 @@ public class MatrixIHandler implements IHandler {
     /**
      *
      * @param matrix
-     * @return
+     * @return int
+     * Submarine Game, return number of submarines
      */
     private int task3(Matrix matrix)  {
 
         ExecutorService threadPool = Executors.newFixedThreadPool(10);
         List<Callable<Void>> tasks = new ArrayList<>();
-        ReentrantLock locker = new ReentrantLock();
         AtomicInteger counter = new AtomicInteger(0);
 
-        List<HashSet<Index>> connectedComponent = task1(matrix);
+        List<HashSet<Index>> connectedComponent = task1;
         final TraversableMatrix traversableMatrix = new TraversableMatrix(matrix);
 
         for(HashSet<Index> component : connectedComponent)
