@@ -18,9 +18,9 @@ public class Client {
 
         // sending #1 matrix
         final int[][] matrix = {
-                {1, 1, 1, 1},
-                {1, 0, 1, 0},
-                {1, 1, 1, 1},
+                {1, 1, 0, 1},
+                {1, 0, 0, 0},
+                {1, 0, 1, 1},
                 {1, 0, 1, 1}
 
         };
@@ -34,30 +34,33 @@ public class Client {
         System.out.println("Binary matrix:");
         PrintArr(matrix);
 
-        task1(toServer,fromServer,matrix);
+        toServer.writeObject("matrix");
+        toServer.writeObject(matrix);
+        toServer.writeObject("weightedMatrix");
+        toServer.writeObject(matrix2);
+
+        task1(toServer,fromServer);
         System.out.println("###################################");
 
-        task2(toServer,fromServer,matrix);
+        task2(toServer,fromServer);
         System.out.println("###################################");
 
-        task3(toServer,fromServer,matrix);
+        task3(toServer,fromServer);
         System.out.println("###################################");
 
         System.out.println("Positive Weighted matrix:");
         PrintArr(matrix2);
-        task4(toServer,fromServer,matrix2);
+        task4(toServer,fromServer);
         System.out.println("###################################");
-
 
         CloseConnection(socket,toServer,fromServer);
     }
 
 
     @SuppressWarnings("unchecked")
-    public static void task1(ObjectOutputStream toServer,ObjectInputStream fromServer,int[][]matrix) throws IOException, ClassNotFoundException {
+    public static void task1(ObjectOutputStream toServer,ObjectInputStream fromServer) throws IOException, ClassNotFoundException {
         toServer.writeObject("1");
         // client send matrix
-        toServer.writeObject(matrix);
         List result =
                 new LinkedList((List<Index>) fromServer.readObject());
         // display result
@@ -67,10 +70,8 @@ public class Client {
 
     }
     @SuppressWarnings("unchecked")
-    public static void task2( ObjectOutputStream toServer,ObjectInputStream fromServer,int[][]matrix) throws IOException, ClassNotFoundException {
+    public static void task2( ObjectOutputStream toServer,ObjectInputStream fromServer) throws IOException, ClassNotFoundException {
         toServer.writeObject("2");
-        // client send matrix
-        toServer.writeObject(matrix);
         // initialize source index
         Index source = new Index(0,0);
         // initialize target index
@@ -83,15 +84,21 @@ public class Client {
         List result =
                 new LinkedList((List<Index>) fromServer.readObject());
         // display result
-        System.out.println("The Shortest Paths from " + source + " to " + dest + " is:");
-        PrintPaths(result);
+        if(result.size() > 0)
+        {
+            System.out.println("The Shortest Paths from " + source + " to " + dest + " is:");
+            PrintPaths(result);
+        }
+        else
+        {
+            System.out.println("No path!");
+        }
+
         System.out.println("Client.Client finished Task 2");
     }
 
-    private static void task3(ObjectOutputStream toServer, ObjectInputStream fromServer, int[][] matrix)throws IOException, ClassNotFoundException {
+    private static void task3(ObjectOutputStream toServer, ObjectInputStream fromServer)throws IOException, ClassNotFoundException {
         toServer.writeObject("3");
-        // client send matrix
-        toServer.writeObject(matrix);
         int result = (int)fromServer.readObject();
         // display result
         System.out.println("Number of submarines: " + result);
@@ -99,9 +106,8 @@ public class Client {
     }
 
     @SuppressWarnings("unchecked")
-    private static void task4(ObjectOutputStream toServer, ObjectInputStream fromServer, int[][] matrix) throws IOException, ClassNotFoundException {
+    private static void task4(ObjectOutputStream toServer, ObjectInputStream fromServer) throws IOException, ClassNotFoundException {
         toServer.writeObject("4");
-        toServer.writeObject(matrix);
         toServer.writeObject(new Index(1,0));
         toServer.writeObject(new Index(1,2));
         Collection<List<Index>> result = (Collection<List<Index>>) fromServer.readObject();

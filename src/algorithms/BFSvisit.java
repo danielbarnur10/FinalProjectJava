@@ -25,7 +25,6 @@ public class BFSvisit<T> {
        // Add the origin node to the queue.
         workingQueue.add(partOfGraph.getOrigin());
 
-
         // while the queue is not empty keep taking out node from the queue.
         while(!workingQueue.isEmpty()){
             Node<T> poppedNode = workingQueue.poll();

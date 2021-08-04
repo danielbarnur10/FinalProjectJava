@@ -4,8 +4,9 @@ import matrix.Node;
 import matrix.Traversable;
 
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -34,14 +35,6 @@ public class ThreadLocalDijkstraVisit<T> {
         finishedThreadLocal.get().add(node);
     }
 
-    protected Node<T> PopPriorityQueue() {
-        return priorityQueueThreadLocal.poll();
-    }
-
-
-    private Collection<Node<T>> Lightest(Traversable<T> partOfGraph, Node<T> poppedNode, Node<T> dest) {
-        return partOfGraph.getReachableNodes(poppedNode);
-    }
 
     /**
      * @param dest

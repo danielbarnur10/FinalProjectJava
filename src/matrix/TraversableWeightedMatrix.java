@@ -80,8 +80,8 @@ public class TraversableWeightedMatrix implements Traversable<Index>{
     }
     private void initializeCostMatrix()
     {
-        int rowSize = matrix.getRow();
-        int colSize = matrix.getColumn();
+        int rowSize = matrix.getRowSize();
+        int colSize = matrix.getColumnSize();
 
         for (int i = 0; i < rowSize; i++) {
             for (int j = 0; j < colSize ; j++) {

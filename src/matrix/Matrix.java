@@ -32,11 +32,11 @@ public class Matrix {
         System.out.println("\n");
     }
 
-    public int getRow() {
+    public int getRowSize() {
         return this.primitiveMatrix.length;
     }
 
-    public int getColumn() {
+    public int getColumnSize() {
         return this.primitiveMatrix[0].length;
     }
 

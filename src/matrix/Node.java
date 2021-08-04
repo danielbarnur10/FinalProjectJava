@@ -3,7 +3,6 @@ package matrix;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.PriorityQueue;
 
 /**
  * This class wraps a concrete object and supplies getters and setters
@@ -88,21 +87,4 @@ public class Node<T> implements Comparable<Node<T>>
         return Integer.compare(this.cost,o.cost);
     }
 
-    public static void main(String[] args) {
-        Node<Index> node1 = new Node<>(new Index(1,1),null);
-        Node<Index> node2 = new Node<>(new Index(2,2),null);
-        Node<Index> node3 = new Node<>(new Index(3,3),null);
-
-        node1.setCost(1);
-        node2.setCost(2);
-        node3.setCost(3);
-
-        PriorityQueue<Node<Index>> queue = new PriorityQueue<>();
-        queue.add(node1);
-        queue.add(node2);
-        queue.add(node3);
-
-        System.out.println(queue.peek());
-
-    }
 }

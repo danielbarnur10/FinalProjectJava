@@ -5,15 +5,18 @@ import server.IHandler;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class MatrixIHandler implements IHandler {
     private boolean doWork = true;
-
     private final Index index = new Index(0, 0);
     private TraversableWeightedMatrix traversableWeightedMatrix;
+    private Matrix matrix;
+    private Matrix weightedMatrix;
 
 
     /**
@@ -26,25 +29,57 @@ public class MatrixIHandler implements IHandler {
      */
     @Override
     public void handle(InputStream inputFromUser, OutputStream inputToUser) throws IOException, ClassNotFoundException {
+
         ObjectInputStream objectInputStream = new ObjectInputStream(inputFromUser);
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(inputToUser);
+
         while (doWork) {
             String taskChoiceFromUser = objectInputStream.readObject().toString();
             switch (taskChoiceFromUser) {
+
+                case "matrix":
+                {
+                    this.matrix = new Matrix((int[][]) objectInputStream.readObject());
+                    break;
+                }
+
+                case "weightedMatrix":
+                {
+                    this.weightedMatrix = new Matrix((int[][]) objectInputStream.readObject());
+                    break;
+                }
+
                 case "1": {
-                    task1(objectInputStream, objectOutputStream);
+                    List result = task1(matrix);
+                    objectOutputStream.writeObject(result);
                     break;
                 }
                 case "2": {
-                    task2(objectInputStream, objectOutputStream);
+
+                    // Receive source from Server
+                    Index source = (Index) objectInputStream.readObject();
+                    // Receive target from Server
+                    Index dest = (Index) objectInputStream.readObject();
+                    Collection<Index> result = task2(matrix, source, dest);
+                    objectOutputStream.writeObject(result);
                     break;
                 }
                 case "3": {
-                    task3(objectInputStream, objectOutputStream);
+                    int result = task3(matrix);
+                    objectOutputStream.writeObject(result);
                     break;
                 }
                 case "4":{
-                    task4(objectInputStream,objectOutputStream);
+
+                    // Get source
+                    Index source = (Index) objectInputStream.readObject();
+
+                    // Get target
+                    Index dest = (Index) objectInputStream.readObject();
+
+                    Collection<List<Index>> result = task4(weightedMatrix,source,dest);
+
+                    objectOutputStream.writeObject(result);
                 }
                 case "stop": {
                     doWork = false;
@@ -70,19 +105,19 @@ public class MatrixIHandler implements IHandler {
         setOfComponents.add((HashSet<Index>) new ThreadLocalDfsVisit<Index>().traverse(traversableMatrix));
 
     }
+
     /**
-     * @param inputFromUser
-     * @param outputToUser
-     * Find all connected components with the 1's
-     * */
-    private void task1(ObjectInputStream inputFromUser, ObjectOutputStream outputToUser) throws IOException, ClassNotFoundException {
+     *
+     * @param matrix
+     * @return List of connected component.
+     */
+    private List task1(Matrix matrix)  {
         List<Callable<Void>> tasks = new ArrayList<>();
         ExecutorService threadPool = Executors.newFixedThreadPool(10);
 //        AtomicInteger count = new AtomicInteger();
         // Get a matrix from client
-        Matrix matrix = new Matrix((int[][]) inputFromUser.readObject());
-        int row = matrix.getRow();
-        int col = matrix.getColumn();
+        int row = matrix.getRowSize();
+        int col = matrix.getColumnSize();
 
         HashSet<HashSet<Index>> setOfComponents = new HashSet<>();
         for (int i = 0; i < row; i++) {
@@ -106,26 +141,22 @@ public class MatrixIHandler implements IHandler {
             // Handle the exception here..
             e.printStackTrace();
         }
-            threadPool.shutdown();
+        threadPool.shutdown();
         List componentResult = new LinkedList();
         Comparator<HashSet<Index>> lengthComparator = (component1, component2) -> Integer.compare(component1.size(), component2.size());
         setOfComponents.stream().sorted(lengthComparator).forEach((i) -> componentResult.add(i));
-        outputToUser.writeObject(componentResult);
+        return componentResult;
     }
+
     /**
-     * @param inputFromUser
-     * @param outputToUser
-     * Find shortest paths from source index to destination index
-     * */
-    private void task2(ObjectInputStream inputFromUser, ObjectOutputStream outputToUser) throws IOException, ClassNotFoundException {
-        // Receive matrix from Server
-        Matrix matrix = new Matrix((int[][]) inputFromUser.readObject());
+     *
+     * @param matrix
+     * @param source
+     * @param dest
+     * @return
 
-        // Receive source from Server
-        Index source = (Index) inputFromUser.readObject();
-
-        // Receive target from Server
-        Index dest = (Index) inputFromUser.readObject();
+     */
+    private Collection<Index> task2(Matrix matrix,Index source, Index dest) {
 
         // Create matrix.TraversableMatrix Object
         TraversableMatrix traversableMatrix = new TraversableMatrix(matrix);
@@ -136,8 +167,7 @@ public class MatrixIHandler implements IHandler {
         // Receive shortest path from BFSAlgo class traverse
         Collection<Index> shortestPath = new BFSvisit<Index>().traverse(new Node<>(dest), traversableMatrix);
 
-        // Sending back the result to the Client.Client
-        outputToUser.writeObject(shortestPath);
+        return shortestPath;
     }
 
     /**
@@ -145,15 +175,18 @@ public class MatrixIHandler implements IHandler {
      * @param traversableMatrix
      * @param index
      * @return Set<matrix.Index>
-     * @return  null
      * Submarine Game, Related to Task 3.
      */
-    private Set<Index> isSubmarine(TraversableMatrix traversableMatrix, Index index) {
+    private boolean isSubmarine(TraversableMatrix traversableMatrix, Index index) {
         // CPU consuming logic here.
         // e.g. check if set of vertices is a submarine (3), or collect all vertices in a connected component (1)
         System.out.println("Running Thread: " + Thread.currentThread().getName());
         traversableMatrix = new TraversableMatrix(traversableMatrix,index);
         Set<Index> set = new ThreadLocalDfsVisit<Index>().traverse(traversableMatrix);
+        if(set.size() < 2)
+        {
+            return false;
+        }
         Index Max = traversableMatrix.getStartIndex(), Min = traversableMatrix.getStartIndex();
         //Finding max and min indices (start and end indices) comparing indices
 
@@ -170,55 +203,43 @@ public class MatrixIHandler implements IHandler {
         int maxR = Max.getRow() + 1, maxC = Max.getColumn() + 1;
         int minR = Min.getRow(), minC = Min.getColumn();
         //Calculating the Area of the ones (1)s,
-        //if the Area is equal to amount of count2 we return true (isSubmarine)
+        //if the Area is equal to amount of set we return true (isSubmarine)
         if (((maxR - minR) * (maxC - minC)) == set.size()) {
-            System.out.println("found Submarine");
-            return set;
+            System.out.println(set);
+            return true;
         } else {
-            return null;
+            return false;
 
         }
     }
+
     /**
-     * @param inputFromUser
-     * @param outputToUser
-     * Task 3 - Submarine Game
-     * */
-    private void task3(ObjectInputStream inputFromUser, ObjectOutputStream outputToUser) throws IOException, ClassNotFoundException {
+     *
+     * @param matrix
+     * @return
+     */
+    private int task3(Matrix matrix)  {
+
         ExecutorService threadPool = Executors.newFixedThreadPool(10);
         List<Callable<Void>> tasks = new ArrayList<>();
         ReentrantLock locker = new ReentrantLock();
-        Object object = inputFromUser.readObject();
-        System.out.println("input:"+object);
-        int[][] matrixFromUser = (int[][]) object;
-        Matrix matrix = new Matrix(matrixFromUser);
-        final TraversableMatrix traversableMatrix = new TraversableMatrix(matrix);//final
-        int row = matrix.getRow();
-        int col = matrix.getColumn();
-        Set<Set<Index>> setOfComponents = new HashSet<>();
-        AtomicInteger count = new AtomicInteger(0);
-        for (int i = 0; i < row; i++) {
-            for (int j = 0; j < col; j++) {
+        AtomicInteger counter = new AtomicInteger(0);
 
-                index.setRowAndCol(i, j);
-                if (matrix.getValue(index) == 1) {
-                    final Index callableIndex = new Index(i, j);
-                    tasks.add(() -> {
-                        Set isSubmarine = isSubmarine(traversableMatrix, callableIndex);
-                        // Run the CPU consuming action outside the lock! (Why?)
-                        if (isSubmarine != null) {
-                            try {
-                                locker.lock();
-                                setOfComponents.add(isSubmarine);
-                            } finally {
-                                locker.unlock();
-                            }
-                        }
-                        return null; // This is a must, cause we are Callable<Void> and not Runnable.
-                    });
+        List<HashSet<Index>> connectedComponent = task1(matrix);
+        final TraversableMatrix traversableMatrix = new TraversableMatrix(matrix);
 
+        for(HashSet<Index> component : connectedComponent)
+        {
+            Index index = (Index) component.toArray()[0];
+            tasks.add(() -> {
+                boolean isSubmarine = isSubmarine(traversableMatrix, index);
+                // Run the CPU consuming action outside the lock! (Why?)
+                if (isSubmarine) {
+                    counter.incrementAndGet();
                 }
-            }
+                return null; // This is a must, cause we are Callable<Void> and not Runnable.
+            });
+
         }
         try {
             // Now invoke all of the tasks
@@ -231,25 +252,17 @@ public class MatrixIHandler implements IHandler {
         }
         threadPool.shutdown();
 
-        System.out.println(setOfComponents.size());
-        System.out.println(setOfComponents);
-        outputToUser.writeObject(setOfComponents.size());
+        return counter.get();
     }
 
     /**
-     * @param inputFromUser
-     * @param outputToUser
-     * Task 4 - Find Lightest paths
-     * */
-    private void task4(ObjectInputStream inputFromUser, ObjectOutputStream outputToUser) throws IOException, ClassNotFoundException {
-        // Get matrix
-        Matrix matrix = new Matrix((int[][]) inputFromUser.readObject());
-
-        // Get source
-        Index source = (Index) inputFromUser.readObject();
-
-        // Get target
-        Index dest = (Index) inputFromUser.readObject();
+     *
+     * @param matrix
+     * @param source
+     * @param dest
+     * @return
+     */
+    private Collection<List<Index>> task4(Matrix matrix,Index source,Index dest) {
 
         // Get traversable
         traversableWeightedMatrix = new TraversableWeightedMatrix(matrix);
@@ -257,10 +270,9 @@ public class MatrixIHandler implements IHandler {
         // Initialize origin index
         traversableWeightedMatrix.setStartIndex(source);
 
-        Collection<List<Index>> shortestPath = new ThreadLocalDijkstraVisit<Index>().traverse(traversableWeightedMatrix, new Node<>(dest));
+        Collection<List<Index>> LightestPaths = new ThreadLocalDijkstraVisit<Index>().traverse(traversableWeightedMatrix, new Node<>(dest));
 
-        System.out.println(shortestPath);
-        // Sending the result to the client
-        outputToUser.writeObject(shortestPath);
+        return LightestPaths;
+
     }
 }
