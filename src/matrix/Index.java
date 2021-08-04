@@ -3,7 +3,7 @@ package matrix;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Objects;
 
 public class Index implements Comparable<Index>, Serializable{
     private int row;

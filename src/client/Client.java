@@ -4,7 +4,10 @@ import matrix.Index;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 public class Client {
     public static void main(String[] args) throws IOException, ClassNotFoundException {

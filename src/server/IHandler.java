@@ -5,5 +5,5 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public interface IHandler {
-    public void handle(InputStream inputFromUser , OutputStream inputToUser) throws IOException, ClassNotFoundException;
+    void handle(InputStream inputFromUser, OutputStream inputToUser) throws IOException, ClassNotFoundException;
 }

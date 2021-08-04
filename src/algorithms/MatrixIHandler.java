@@ -1,7 +1,9 @@
 package algorithms;
 
 import matrix.*;
-import server.*;
+import server.HandlingThread;
+import server.IHandler;
+
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.Callable;
