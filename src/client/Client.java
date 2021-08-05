@@ -78,14 +78,13 @@ public class Client {
         // initialize source index
         Index source = new Index(0,0);
         // initialize target index
-        Index dest = new Index(3,3);
+        Index dest = new Index(3,0);
         // client send source index
         toServer.writeObject(source);
         // client send target index
         toServer.writeObject(dest);
         // get shortest paths from server
-        List result =
-                new LinkedList((List<Index>) fromServer.readObject());
+        List result = new LinkedList((List<Index>) fromServer.readObject());
         // display result
         if(result.size() > 0)
         {
