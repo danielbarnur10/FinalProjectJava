@@ -19,9 +19,9 @@ public class MatrixIHandler implements IHandler {
 
     /**
      *
-     * @param inputFromUser
-     * @param inputToUser
-     * @throws IOException
+     * @param inputFromUser from user
+     * @param inputToUser to user
+     * @throws IOException exception
      * @throws ClassNotFoundException
      * Handles requests from Server
      */
